@@ -88,15 +88,8 @@ export default function FoodCard({ item, index, displayPrice, iranianRice, onCli
           {/* Image overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-          {/* Day badge */}
-          <div className="absolute top-3 right-3 z-10">
-            <span className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/90 text-xs font-medium">
-              روز {item.day}
-            </span>
-          </div>
-
           {/* Meal badge */}
-          <div className="absolute top-3 left-3 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <span className={`px-3 py-1 rounded-full bg-gradient-to-r ${mealBadgeColor} text-white text-xs font-medium backdrop-blur-md`}>
               {item.meal === "breakfast" ? "صبحانه" : item.meal === "lunch" ? "ناهار" : "شام"}
             </span>

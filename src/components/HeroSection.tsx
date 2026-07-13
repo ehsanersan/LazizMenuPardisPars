@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { heroImage } from "../data/menuData";
+import { heroImage } from "../config/images";
 import { Sparkles, ChefHat, Truck } from "lucide-react";
 
 function Glass3DText() {

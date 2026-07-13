@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
 import type { MenuItem } from "../data/menuData";
@@ -7,18 +7,71 @@ import { formatPrice, mealLabels } from "../data/menuData";
 interface FoodDetailsModalProps {
   item: MenuItem | null;
   onClose: () => void;
-  iranianRice: boolean;
-  includeVAT: boolean;
+  globalIranianRice: boolean;
+  globalIncludeVAT: boolean;
+}
+
+// Toggle component
+function ToggleSwitch({
+  label,
+  enabled,
+  onChange,
+  disabled = false,
+}: {
+  label: string;
+  enabled: boolean;
+  onChange: (v: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      onClick={() => !disabled && onChange(!enabled)}
+      className={`flex items-center justify-between w-full p-3 rounded-xl transition-all ${
+        disabled 
+          ? "bg-white/[0.02] opacity-50 cursor-not-allowed" 
+          : "bg-white/[0.03] hover:bg-white/[0.06]"
+      }`}
+      disabled={disabled}
+      aria-pressed={enabled}
+    >
+      <span className={`text-sm ${disabled ? "text-white/30" : "text-white/60"}`}>
+        {label}
+      </span>
+      <div
+        className={`relative w-11 h-6 rounded-full transition-colors ${
+          enabled ? "bg-amber-500" : "bg-white/10"
+        } ${disabled ? "opacity-50" : ""}`}
+      >
+        <motion.div
+          className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-md"
+          animate={{ right: enabled ? 4 : "auto", left: enabled ? "auto" : 4 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        />
+      </div>
+    </button>
+  );
 }
 
 export default function FoodDetailsModal({
   item,
   onClose,
-  iranianRice,
-  includeVAT,
+  globalIranianRice,
+  globalIncludeVAT,
 }: FoodDetailsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Local state for toggles - initialized from global state
+  const [localIranianRice, setLocalIranianRice] = useState(globalIranianRice);
+  const [localIncludeVAT, setLocalIncludeVAT] = useState(globalIncludeVAT);
+
+  // Reset local state when modal opens with new item
+  useEffect(() => {
+    if (item) {
+      setLocalIranianRice(globalIranianRice);
+      setLocalIncludeVAT(globalIncludeVAT);
+    }
+  }, [item, globalIranianRice, globalIncludeVAT]);
 
   useEffect(() => {
     if (!item) return;
@@ -59,9 +112,9 @@ export default function FoodDetailsModal({
   const calculatePrice = () => {
     if (!item) return { base: 0, rice: 0, vat: 0, total: 0 };
     const base = item.price;
-    const rice = item.hasRice && iranianRice ? 500000 : 0;
+    const rice = item.hasRice && localIranianRice ? 500000 : 0;
     const subtotal = base + rice;
-    const vat = includeVAT ? Math.round(subtotal * 0.1) : 0;
+    const vat = localIncludeVAT ? Math.round(subtotal * 0.1) : 0;
     const total = subtotal + vat;
     return { base, rice, vat, total };
   };
@@ -120,12 +173,6 @@ export default function FoodDetailsModal({
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1a0f2e] via-transparent to-transparent" />
-              {/* Day badge */}
-              <div className="absolute top-4 right-4">
-                <span className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white font-medium text-sm">
-                  روز {item.day}
-                </span>
-              </div>
             </div>
 
             {/* Content */}
@@ -149,12 +196,22 @@ export default function FoodDetailsModal({
               </div>
 
               {/* Name */}
-              <h2 className="text-2xl md:text-3xl font-black text-white mb-3">{item.name}</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-white mb-6">{item.name}</h2>
 
-              {/* Description */}
-              <p className="text-white/60 text-base leading-relaxed mb-6">
-                {item.fullDescription}
-              </p>
+              {/* Toggle Controls */}
+              <div className="space-y-2 mb-6">
+                <ToggleSwitch
+                  label="تفاوت برنج ایرانی (+۵۰۰,۰۰۰ ریال)"
+                  enabled={localIranianRice}
+                  onChange={setLocalIranianRice}
+                  disabled={!item.hasRice}
+                />
+                <ToggleSwitch
+                  label="۱۰٪ ارزش افزوده"
+                  enabled={localIncludeVAT}
+                  onChange={setLocalIncludeVAT}
+                />
+              </div>
 
               {/* Price breakdown */}
               <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
@@ -173,21 +230,29 @@ export default function FoodDetailsModal({
                         <div className="flex justify-between items-center">
                           <span className="text-white/50 text-sm">
                             تفاوت برنج ایرانی
-                            {!iranianRice && " (غیرفعال)"}
                           </span>
-                          <span className={`text-sm price-number ${rice > 0 ? "text-amber-400" : "text-white/30"}`}>
+                          <motion.span 
+                            key={rice}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className={`text-sm price-number ${rice > 0 ? "text-amber-400" : "text-white/30"}`}
+                          >
                             {rice > 0 ? `+${formatPrice(rice)} ریال` : "—"}
-                          </span>
+                          </motion.span>
                         </div>
                       )}
                       <div className="flex justify-between items-center">
                         <span className="text-white/50 text-sm">
                           ۱۰٪ ارزش افزوده
-                          {!includeVAT && " (غیرفعال)"}
                         </span>
-                        <span className={`text-sm price-number ${vat > 0 ? "text-amber-400" : "text-white/30"}`}>
+                        <motion.span 
+                          key={vat}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`text-sm price-number ${vat > 0 ? "text-amber-400" : "text-white/30"}`}
+                        >
                           {vat > 0 ? `+${formatPrice(vat)} ریال` : "—"}
-                        </span>
+                        </motion.span>
                       </div>
                       <div className="border-t border-white/10 pt-3 flex justify-between items-center">
                         <span className="text-white font-bold text-sm">قیمت نهایی</span>
@@ -204,13 +269,6 @@ export default function FoodDetailsModal({
                   );
                 })()}
               </div>
-
-              {/* Rice note */}
-              {item.hasRice && (
-                <p className="mt-4 text-white/30 text-xs leading-relaxed">
-                  قیمت پایه با برنج هندی محاسبه شده است. در صورت درخواست برنج ایرانی، مبلغ ۵۰۰,۰۰۰ ریال به قیمت اضافه می‌شود.
-                </p>
-              )}
 
               {/* Back button */}
               <button

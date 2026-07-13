@@ -7,7 +7,7 @@ import PriceControls from "./components/PriceControls";
 import MenuGrid from "./components/MenuGrid";
 import FoodDetailsModal from "./components/FoodDetailsModal";
 import PricingNotice from "./components/PricingNotice";
-import AboutSection from "./components/AboutSection";
+import PackagingSection from "./components/PackagingSection";
 import GlassFooter from "./components/GlassFooter";
 import AmbientBackground from "./components/AmbientBackground";
 import { menuItems } from "./data/menuData";
@@ -65,10 +65,10 @@ export default function App() {
         {/* Section Title */}
         <div className="text-center mb-8 px-4">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3">
-            منوی غذایی ۱۴ روزه
+            برنامه غذایی ۱۴ روزه
           </h2>
           <p className="text-white/40 text-sm sm:text-base max-w-xl mx-auto">
-            برنامه غذایی دو هفته‌ای شامل صبحانه، ناهار و شام
+            شامل صبحانه، ناهار و شام
           </p>
         </div>
 
@@ -117,8 +117,8 @@ export default function App() {
       {/* Pricing Notice */}
       <PricingNotice />
 
-      {/* About */}
-      <AboutSection />
+      {/* Packaging */}
+      <PackagingSection />
 
       {/* Footer */}
       <GlassFooter />
@@ -127,8 +127,8 @@ export default function App() {
       <FoodDetailsModal
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
-        iranianRice={iranianRice}
-        includeVAT={includeVAT}
+        globalIranianRice={iranianRice}
+        globalIncludeVAT={includeVAT}
       />
     </div>
   );
